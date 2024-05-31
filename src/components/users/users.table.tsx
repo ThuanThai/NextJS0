@@ -22,25 +22,35 @@ const UsersTable = () => {
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [dataUpdate, setDataUpdate] = useState<IUserForm | null>(null);
     const [dataSource, setDataSource] = useState<IUserForm[]>([]);
-    const token =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0b2tlbiBsb2dpbiIsImlzcyI6ImZyb20gc2VydmVyIiwiX2lkIjoiNjYzOWZjMjgzZDkxMDU4YjhiZGRjNTM0IiwiZW1haWwiOiJhZG1pbkBnbWFpbC5jb20iLCJhZGRyZXNzIjoiVmlldE5hbSIsImlzVmVyaWZ5Ijp0cnVlLCJuYW1lIjoiSSdtIGFkbWluIiwidHlwZSI6IlNZU1RFTSIsInJvbGUiOiJBRE1JTiIsImdlbmRlciI6Ik1BTEUiLCJhZ2UiOjY5LCJpYXQiOjE3MTY4ODQ3OTAsImV4cCI6MTgwMzI4NDc5MH0.HBX4UqaZ3LSUAgndyl-Uojgp5Njn8_NEYtjaLO6Z4iU";
+    const [meta, setMeta] = useState({
+        current: 1,
+        pageSize: 5,
+        pages: 0,
+        total: 0,
+    });
 
+    const token = localStorage.getItem("access_token");
     const getData = async () => {
-        const res = await fetch("http://localhost:8000/api/v1/users/all", {
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-        });
+        const res = await fetch(
+            `http://localhost:8000/api/v1/users?current=${meta.current}&pageSize=${meta.pageSize}`,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
 
         const data = await res.json();
         const users = data.data.result;
+        const pageInfo = data.data.meta;
+        setMeta((prev) => ({
+            ...prev,
+            total: pageInfo.total,
+            pages: pageInfo.pages,
+        }));
         setDataSource(users);
     };
-
-    useEffect(() => {
-        getData();
-    }, []);
 
     const cancel: PopconfirmProps["onCancel"] = (e) => {
         console.log(e);
@@ -123,6 +133,18 @@ const UsersTable = () => {
         },
     ];
 
+    const handleChangePage = (page: number, pageSize: number) => {
+        setMeta({
+            ...meta,
+            current: page,
+            pageSize: pageSize,
+        });
+    };
+
+    useEffect(() => {
+        getData();
+    }, [meta.pageSize, meta.current]);
+
     return (
         <div>
             <div
@@ -149,7 +171,21 @@ const UsersTable = () => {
                     setIsUpdateModalOpen={setIsUpdateModalOpen}
                     token={token}></UpdateModal>
             </div>
-            <Table rowKey="_id" dataSource={dataSource} columns={columns} />;
+            <Table
+                rowKey="_id"
+                dataSource={dataSource}
+                columns={columns}
+                pagination={{
+                    current: meta.current,
+                    defaultCurrent: 1,
+                    pageSize: meta.pageSize,
+                    total: meta.total,
+                    onChange: (page: number, pageSize: number) =>
+                        handleChangePage(page, pageSize),
+                    showSizeChanger: true,
+                }}
+            />
+            ;
         </div>
     );
 };

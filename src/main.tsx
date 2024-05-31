@@ -1,18 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import UsersPage from "./screens/users.page";
-import Header from "./components/header/Header";
 import "./App.css";
-
-const LayoutAdmin = () => {
-    return (
-        <div>
-            <Header></Header>
-            <Outlet></Outlet>
-        </div>
-    );
-};
+import LayoutAdmin from "./components/layout/admin.layout";
 
 const router = createBrowserRouter([
     {

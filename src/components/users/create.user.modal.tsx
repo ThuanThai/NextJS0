@@ -1,40 +1,29 @@
-import { Input, Modal, notification } from "antd";
-import { ChangeEvent, useState } from "react";
+import { Input, Modal, notification, Form, Select } from "antd";
+import type { FormProps } from "antd";
 import { IUserForm } from "./users.table";
 
 interface IProps {
     isCreateModalOpen: boolean;
     setIsCreateModalOpen: (val: boolean) => void;
-    token: string;
+    token: string | null;
 }
 
 const CreateModal = (props: IProps) => {
     const { isCreateModalOpen, setIsCreateModalOpen, token } = props;
-    const [formValue, setFormValue] = useState<IUserForm>({
-        email: "",
-        name: "",
-        password: "",
-        age: "",
-        role: "",
-        gender: "",
-        address: "",
-    });
-    const onChangeFormValue = (event: ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = event.target;
-        setFormValue((prevState) => ({
-            ...prevState,
-            [name]: value,
-        }));
+    const [form] = Form.useForm();
+
+    const handleCancel = () => {
+        setIsCreateModalOpen(false);
     };
 
-    const handleOk = async () => {
+    const onFinish: FormProps<IUserForm>["onFinish"] = async (values) => {
         const res = await fetch("http://localhost:8000/api/v1/users", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(formValue),
+            body: JSON.stringify({ ...values }),
         });
         const d = await res.json();
         if (d.data) {
@@ -44,16 +33,7 @@ const CreateModal = (props: IProps) => {
                     "Lorem, ipsum dolor sit amet consectetur adipisicing elit.",
             });
             setIsCreateModalOpen(false);
-            //reset value
-            setFormValue({
-                email: "",
-                name: "",
-                password: "",
-                age: "",
-                role: "",
-                gender: "",
-                address: "",
-            });
+            form.resetFields();
         } else {
             notification.error({
                 message: "Error",
@@ -62,98 +42,126 @@ const CreateModal = (props: IProps) => {
         }
 
         console.log(d);
+        console.log("Success:", values);
     };
 
-    const handleCancel = () => {
-        setFormValue({
-            email: "",
-            name: "",
-            password: "",
-            age: "",
-            role: "",
-            gender: "",
-            address: "",
-        });
-        setIsCreateModalOpen(false);
+    const onFinishFailed: FormProps["onFinishFailed"] = (errorInfo) => {
+        console.log("Failed:", errorInfo);
     };
 
     return (
         <Modal
             title="Add New User"
             open={isCreateModalOpen}
-            onOk={handleOk}
+            onOk={() => form.submit()}
             onCancel={handleCancel}>
-            <div>
-                <label htmlFor="name">Name: </label>
-                <Input
-                    value={formValue.name}
-                    onChange={onChangeFormValue}
+            <Form
+                form={form}
+                layout="vertical"
+                name="basic"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 24 }}
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
+                autoComplete="off">
+                <Form.Item<IUserForm>
+                    style={{ marginBottom: 10 }}
+                    label="Name"
                     name="name"
-                    id="name"
-                    placeholder="Enter your name"
-                />
-            </div>
-            <div>
-                <label htmlFor="email">Email: </label>
-                <Input
-                    value={formValue.email}
-                    onChange={onChangeFormValue}
-                    name="email"
-                    id="email"
-                    placeholder="Enter your email"
-                />
-            </div>
-            <div>
-                <label htmlFor="password">Password: </label>
-                <Input
-                    value={formValue.password}
-                    onChange={onChangeFormValue}
-                    name="password"
-                    id="password"
-                    placeholder="Enter your password"
-                />
-            </div>
+                    rules={[
+                        {
+                            required: true,
+                            message: "Please input your Name!",
+                        },
+                    ]}>
+                    <Input />
+                </Form.Item>
 
-            <div>
-                <label htmlFor="age">Age: </label>
-                <Input
-                    value={formValue.age}
-                    onChange={onChangeFormValue}
+                <Form.Item<IUserForm>
+                    style={{ marginBottom: 10 }}
+                    label="Email"
+                    name="email"
+                    rules={[
+                        {
+                            required: true,
+                            message: "Please input your Email!",
+                        },
+                    ]}>
+                    <Input />
+                </Form.Item>
+
+                <Form.Item<IUserForm>
+                    style={{ marginBottom: 10 }}
+                    label="Password"
+                    name="password"
+                    rules={[
+                        {
+                            required: true,
+                            message: "Please input your Password!",
+                        },
+                    ]}>
+                    <Input.Password />
+                </Form.Item>
+
+                <Form.Item<IUserForm>
+                    style={{ marginBottom: 10 }}
+                    label="Age"
                     name="age"
-                    id="age"
-                    placeholder="Enter your age"
-                />
-            </div>
-            <div>
-                <label htmlFor="gender">Gender: </label>
-                <Input
-                    value={formValue.gender}
-                    onChange={onChangeFormValue}
-                    name="gender"
-                    id="gender"
-                    placeholder="Enter your gender"
-                />
-            </div>
-            <div>
-                <label htmlFor="address">Address: </label>
-                <Input
-                    value={formValue.address}
-                    onChange={onChangeFormValue}
+                    rules={[
+                        {
+                            required: true,
+                            message: "Please input your Age!",
+                        },
+                    ]}>
+                    <Input />
+                </Form.Item>
+
+                <Form.Item<IUserForm>
+                    style={{ marginBottom: 10 }}
+                    label="Address"
                     name="address"
-                    id="address"
-                    placeholder="Enter your address"
-                />
-            </div>
-            <div>
-                <label htmlFor="role">Role: </label>
-                <Input
-                    value={formValue.role}
-                    onChange={onChangeFormValue}
+                    rules={[
+                        {
+                            required: true,
+                            message: "Please input your Address!",
+                        },
+                    ]}>
+                    <Input />
+                </Form.Item>
+
+                <Form.Item<IUserForm>
+                    style={{ marginBottom: 10 }}
+                    label="Gender"
+                    name="gender"
+                    rules={[
+                        {
+                            required: true,
+                            message: "Please input your Gender!",
+                        },
+                    ]}>
+                    <Select>
+                        <Select.Option value="MALE">Male</Select.Option>
+                        <Select.Option value="FEMALE">Female</Select.Option>
+                        <Select.Option value="OTHER">Other</Select.Option>
+                    </Select>
+                </Form.Item>
+
+                <Form.Item<IUserForm>
+                    style={{ marginBottom: 10 }}
+                    label="Role"
                     name="role"
-                    id="role"
-                    placeholder="Enter your role"
-                />
-            </div>
+                    rules={[
+                        {
+                            required: true,
+                            message: "Please input your Role!",
+                        },
+                    ]}>
+                    <Select>
+                        <Select.Option value="ADMIN">Admin</Select.Option>
+                        <Select.Option value="USER">User</Select.Option>
+                    </Select>
+                </Form.Item>
+            </Form>
         </Modal>
     );
 };
