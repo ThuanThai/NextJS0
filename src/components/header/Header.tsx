@@ -1,29 +1,34 @@
-import { UserOutlined, HomeOutlined } from "@ant-design/icons";
-import type { MenuProps } from "antd";
-import { Menu } from "antd";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { UserOutlined, HomeOutlined, FireOutlined } from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import { Menu } from 'antd';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-type MenuItem = Required<MenuProps>["items"][number];
+type MenuItem = Required<MenuProps>['items'][number];
 
 const items: MenuItem[] = [
     {
-        label: <Link to={"/"}>HomePage</Link>,
-        key: "mail",
+        label: <Link to={'/'}>HomePage</Link>,
+        key: 'mail',
         icon: <HomeOutlined />,
     },
     {
-        label: <Link to={"/users"}>Users</Link>,
-        key: "users",
+        label: <Link to={'/users'}>Users</Link>,
+        key: 'users',
         icon: <UserOutlined />,
+    },
+    {
+        label: <Link to={'/tracks'}>Tracks</Link>,
+        key: 'tracks',
+        icon: <FireOutlined />,
     },
 ];
 
 const Header = () => {
-    const [current, setCurrent] = useState("mail");
+    const [current, setCurrent] = useState('mail');
 
-    const onClick: MenuProps["onClick"] = (e) => {
-        console.log("click ", e);
+    const onClick: MenuProps['onClick'] = (e) => {
+        console.log('click ', e);
         setCurrent(e.key);
     };
 
